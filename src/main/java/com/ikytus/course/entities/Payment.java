@@ -2,18 +2,13 @@ package com.ikytus.course.entities;
 
 import java.io.Serializable;
 import java.time.Instant;
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
+import javax.persistence.MapsId;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
@@ -21,8 +16,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ikytus.course.entities.enums.OrderStatus;
 
 @Entity
-@Table(name = "orders")
-public class Order implements Serializable{
+@Table(name = "payments")
+public class Payment implements Serializable{
 	private static final long serialVersionUID = 1L;
 
 	@Id
@@ -32,24 +27,17 @@ public class Order implements Serializable{
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "GMT")
 	private Instant moment;
 	
-	@ManyToOne
-	@JoinColumn(name = "client_id")
-	private User client;
-	private Integer orderStatus;
+	@OneToOne
+	@MapsId
+	private Order order;
 	
-	@OneToMany(mappedBy = "id.order")
-	private Set<OrderItem> itens = new HashSet<>();
 	
-	@OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
-	private Payment payment;
-	
-	public Order() {}
+	public Payment() {}
 
-	public Order(Long id, Instant moment, OrderStatus orderStatus, User client) {
+	public Payment(Long id, Instant moment, Order order) {
 		this.id = id;
 		this.moment = moment;
-		this.client = client;
-		setOrderStatus(orderStatus);
+		this.order = order;
 	}
 
 	public Long getId() {
@@ -67,35 +55,13 @@ public class Order implements Serializable{
 	public void setMoment(Instant moment) {
 		this.moment = moment;
 	}
-
-	public User getClient() {
-		return client;
-	}
-
-	public void setClient(User client) {
-		this.client = client;
-	}
 	
-	public OrderStatus getOrderStatus() {
-		return OrderStatus.valueOf(orderStatus);
+	public Order getOrder() {
+		return order;
 	}
 
-	public void setOrderStatus(OrderStatus orderStatus) {
-		if(orderStatus != null) {
-			this.orderStatus = orderStatus.getCode();
-		}
-	}
-	
-	public Payment getPayment() {
-		return payment;
-	}
-
-	public void setPayment(Payment payment) {
-		this.payment = payment;
-	}
-
-	public Set<OrderItem> getItens() {
-		return itens;
+	public void setOrder(Order order) {
+		this.order = order;
 	}
 
 	@Override
@@ -111,7 +77,7 @@ public class Order implements Serializable{
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Order other = (Order) obj;
+		Payment other = (Payment) obj;
 		return Objects.equals(id, other.id);
 	}
 }
